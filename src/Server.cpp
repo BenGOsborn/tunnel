@@ -92,6 +92,11 @@ namespace server
         listen(fd_, SOMAXCONN);
     }
 
+    Server::Server(Server &&other) : fd_(other.fd_)
+    {
+        other.fd_ = -1;
+    }
+
     Server::~Server()
     {
         close(fd_);
@@ -110,5 +115,15 @@ namespace server
         inet_ntop(AF_INET, &client_addr.sin_addr, ip, sizeof(ip));
         int port = ntohs(client_addr.sin_port);
         return connection::Connection(clientFD, Address{ip, port});
+    }
+
+    Server &Server::operator=(Server &&other)
+    {
+        if (this != &other)
+        {
+            fd_ = other.fd_;
+            other.fd_ = -1;
+        }
+        return *this;
     }
 }

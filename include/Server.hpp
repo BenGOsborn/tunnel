@@ -46,9 +46,13 @@ namespace server
     class Server
     {
     public:
-        explicit Server(const Address &address);
+        Server(const Address &address);
+        Server(const Server &other) = delete;
+        Server(Server &&other);
         ~Server();
         std::expected<connection::Connection, std::string> Accept();
+        Server &operator=(const Server &other) = delete;
+        Server &operator=(Server &&other);
 
     private:
         int fd_;
