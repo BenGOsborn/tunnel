@@ -20,6 +20,37 @@ namespace server
         {
             return address_;
         }
+
+        std::expected<std::optional<SocketData>, std::string> Connection::Read()
+        {
+            SocketData result;
+            ssize_t size = read(fd_, &result.data, result.data.size());
+            if (size < 0)
+            {
+                return std::unexpected(std::format("read failed, reason={}", size));
+            }
+            if (size == 0)
+            {
+                return std::nullopt;
+            }
+            result.size = static_cast<size_t>(size);
+            return result;
+        }
+
+        std::expected<bool, std::string> Connection::Write(std::string_view data)
+        {
+            size_t total = 0;
+            while (total < data.size())
+            {
+                ssize_t n = write(fd_, data.data() + total, data.size() - total);
+                if (n <= 0)
+                {
+                    return std::unexpected(std::format("write failed, reason={}", n));
+                }
+                total += static_cast<size_t>(n);
+            }
+            return true;
+        }
     }
 
     Server::Server(const Address &address)
