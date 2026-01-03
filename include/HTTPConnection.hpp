@@ -10,7 +10,7 @@ namespace server::connection
         HTTPConnection(const HTTPConnection &other) = delete;
         HTTPConnection(HTTPConnection &&other) = default;
         ~HTTPConnection() = default;
-        std::expected<bool, std::string> Serve();
+        std::expected<bool, std::string> Handle();
         HTTPConnection &operator=(const HTTPConnection &other) = delete;
         HTTPConnection &operator=(HTTPConnection &&other) = default;
 
