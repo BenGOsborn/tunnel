@@ -12,27 +12,27 @@ int main()
 
     std::cout << "Server is listening... " << HOST << ":" << PORT << std::endl;
 
-    auto conn_ = server.Accept();
-    if (!conn_)
+    auto _conn = server.Accept();
+    if (!_conn)
     {
-        throw std::runtime_error(std::format("failed to accept client, err={}", conn_.error()));
+        throw std::runtime_error(std::format("failed to accept client, err={}", _conn.error()));
     }
-    auto conn = std::move(*conn_);
+    auto conn = std::move(*_conn);
 
     auto address = conn.GetAddress();
     std::cout << address << std::endl;
 
-    auto data__ = conn.Read();
-    if (!data__)
+    auto __data = conn.Read();
+    if (!__data)
     {
-        throw std::runtime_error(std::format("failed to read data, err={}", data__.error()));
+        throw std::runtime_error(std::format("failed to read data, err={}", __data.error()));
     }
-    auto data_ = *data__;
-    if (!data_)
+    auto _data = *__data;
+    if (!_data)
     {
         throw std::runtime_error("data is missing");
     }
-    auto data = *data_;
+    auto data = *_data;
     std::cout << data << std::endl;
 
     return 0;
