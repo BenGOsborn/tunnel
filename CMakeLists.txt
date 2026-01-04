@@ -10,6 +10,7 @@ add_executable(app
     src/Connection.cpp
     src/HTTPServer.cpp
     src/HTTPConnection.cpp
+    src/Utils.cpp
 )
 
 target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
