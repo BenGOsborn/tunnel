@@ -10,6 +10,7 @@ add_executable(app
     src/Connection.cpp
     src/HTTPServer.cpp
     src/HTTPConnection.cpp
+    src/HTTPRequest.cpp
     src/Utils.cpp
 )
 
