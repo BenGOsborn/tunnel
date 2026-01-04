@@ -28,9 +28,20 @@ namespace request
         HTTPHeaders headers;
     };
 
+    struct HTTPResponse
+    {
+        HTTPVersion version;
+        int statusCode;
+        std::string statusMessage;
+        HTTPHeaders headers;
+        std::string body;
+    };
+
     std::expected<HTTPVersion, std::string> ParseHTTPVersion(const std::string &version);
 
     std::expected<HTTPMethod, std::string> ParseHTTPMethod(const std::string &method);
 
     std::expected<HTTPRequest, std::string> ParseHTTPRequest(const std::string &req);
+
+    std::string BuildHTTPResponse(const HTTPResponse &resp);
 }
