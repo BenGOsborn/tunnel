@@ -23,6 +23,8 @@ namespace common
 
     struct HTTPRequest
     {
+        size_t headerSize;
+        size_t bodySize;
         HTTPMethod method;
         std::string path;
         HTTPVersion version;
@@ -40,6 +42,8 @@ namespace common
     };
 
     std::expected<HTTPRequest, std::string> ParseHTTPRequest(const std::string &req);
+
+    std::expected<std::string, std::string> ParseHTTPBody(const std::string &req, size_t bodySize);
 
     std::expected<std::string, std::string> BuildHTTPResponse(const HTTPResponse &resp);
 

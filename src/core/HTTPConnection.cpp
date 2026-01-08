@@ -37,7 +37,7 @@ namespace server::connection
                 std::expected<std::optional<SocketData>, std::string> __data = connection_.Read();
                 if (!__data)
                 {
-                    return std::unexpected(std::format("failed to read data, err={}", __data.error()));
+                    return std::unexpected(std::format("failed to read header, err={}", __data.error()));
                 }
                 std::optional<SocketData> _data = *__data;
                 if (!_data)
@@ -56,7 +56,29 @@ namespace server::connection
                     return std::unexpected(std::format("failed to send failed response, err={}", _success.error()));
                 }
             }
-            std::expected<common::HTTPResponse, std::string> _httpResp = handler(*_httpReq);
+            auto httpReq = *_httpReq;
+            while (req.size() - httpReq.headerSize < httpReq.bodySize)
+            {
+                std::expected<std::optional<SocketData>, std::string> __data = connection_.Read();
+                if (!__data)
+                {
+                    return std::unexpected(std::format("failed to read body, err={}", __data.error()));
+                }
+                std::optional<SocketData> _data = *__data;
+                if (!_data)
+                {
+                    return true;
+                }
+                SocketData data = *_data;
+                req += std::string(data.data.begin(), data.data.begin() + data.size);
+            }
+            std::expected<std::string, std::string> _body = common::ParseHTTPBody(req, httpReq.bodySize);
+            if (!_body)
+            {
+                return std::unexpected(std::format("failed to get body, err={}", _body.error()));
+            }
+            httpReq.body = *_body;
+            std::expected<common::HTTPResponse, std::string> _httpResp = handler(httpReq);
             if (!_httpResp)
             {
                 return std::unexpected(std::format("failed to execute handler, err={}", _httpResp.error()));

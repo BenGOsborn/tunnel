@@ -1,4 +1,5 @@
 #include "core/Utils.hpp"
+#include <format>
 
 namespace utils
 {
@@ -17,5 +18,17 @@ namespace utils
         }
         parts.push_back(str.substr(pos));
         return parts;
+    }
+
+    std::expected<int, std::string> SafeSTOI(const std::string &str)
+    {
+        try
+        {
+            return std::stoi(str);
+        }
+        catch (...)
+        {
+            return std::unexpected(std::format("failed to parse string to int, str={}", str));
+        }
     }
 }

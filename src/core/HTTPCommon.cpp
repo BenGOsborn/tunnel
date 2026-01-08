@@ -3,7 +3,6 @@
 #include <expected>
 #include <vector>
 #include <format>
-#include <format>
 
 namespace
 {
@@ -127,6 +126,7 @@ namespace common
         }
         auto requestLine = *_requestLine;
         HTTPHeaders httpHeaders;
+        size_t bodySize = 0;
         for (int i = 1; i < lines.size(); i++)
         {
             const auto &header = lines[i];
@@ -137,8 +137,28 @@ namespace common
             }
             auto httpHeader = *_httpHeader;
             httpHeaders[httpHeader.key] = httpHeader.value;
+            if (httpHeader.key == CONTENT_LENGTH_HEADER)
+            {
+                std::expected<int, std::string> _bodySize = utils::SafeSTOI(httpHeader.value);
+                if (!_bodySize)
+                {
+                    return std::unexpected(std::format("failed to get body size, err={}", _bodySize.error()));
+                }
+                bodySize = static_cast<size_t>(*_bodySize);
+            }
         }
-        return HTTPRequest{requestLine.method, requestLine.path, requestLine.version, httpHeaders, ""};
+        return HTTPRequest{pos, bodySize, requestLine.method, requestLine.path, requestLine.version, httpHeaders, ""};
+    }
+
+    std::expected<std::string, std::string> ParseHTTPBody(const std::string &req, size_t bodySize)
+    {
+        size_t pos = req.find(common::HEADER_END);
+        if (pos == std::string::npos)
+        {
+            return std::unexpected("unable to find the end of the header");
+        }
+        size_t offset = pos + common::HEADER_END.size();
+        return req.substr(offset, offset + bodySize);
     }
 
     std::expected<std::string, std::string> BuildHTTPResponse(const HTTPResponse &resp)
