@@ -5,9 +5,9 @@
 
 namespace common
 {
-    using HTTPHeaders = std::map<std::string, std::string>;
-
     constexpr std::string HEADER_END = "\r\n\r\n";
+
+    using HTTPHeaders = std::map<std::string, std::string>;
 
     enum HTTPMethod
     {
@@ -26,6 +26,7 @@ namespace common
         std::string path;
         HTTPVersion version;
         HTTPHeaders headers;
+        std::string body;
     };
 
     struct HTTPResponse
@@ -37,11 +38,7 @@ namespace common
         std::string body;
     };
 
-    std::expected<HTTPVersion, std::string> ParseHTTPVersion(const std::string &version);
-
-    std::expected<HTTPMethod, std::string> ParseHTTPMethod(const std::string &method);
-
     std::expected<HTTPRequest, std::string> ParseHTTPRequest(const std::string &req);
 
-    std::string BuildHTTPResponse(const HTTPResponse &resp);
+    std::expected<std::string, std::string> BuildHTTPResponse(const HTTPResponse &resp);
 }

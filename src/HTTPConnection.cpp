@@ -35,9 +35,17 @@ namespace server::connection
             {
                 std::cout << "We need to return a 400 here" << std::endl;
             }
-            for (auto const &[key, val] : (*_httpReq).headers)
+            std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 200, "OK", common::HTTPHeaders{}, "hello world"});
+            if (!_resp)
             {
-                std::cout << key << ": " << val << std::endl;
+                return std::unexpected(std::format("failed to build response, err={}", _resp.error()));
+            }
+            auto resp = *_resp;
+            std::cout << resp << std::endl;
+            std::expected<bool, std::string> _success = connection_.Write(resp);
+            if (!_success)
+            {
+                return std::unexpected(std::format("failed to send response, err={}", _resp.error()));
             }
         }
     }
