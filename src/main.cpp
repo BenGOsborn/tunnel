@@ -1,5 +1,5 @@
-#include "Server.hpp"
-#include "HTTPServer.hpp"
+#include "core/HTTPServer.hpp"
+#include "handler/Handler.hpp"
 #include <exception>
 #include <format>
 #include <iostream>
@@ -21,7 +21,7 @@ int main()
     }
     HTTPConnection conn = std::move(*_conn);
 
-    auto _success = conn.Handle();
+    auto _success = conn.Handle(handler::Handle);
     if (!_success)
     {
         throw std::runtime_error(std::format("failed to read data, err={}", _success.error()));

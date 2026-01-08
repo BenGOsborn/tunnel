@@ -1,5 +1,5 @@
-#include "HTTPConnection.hpp"
-#include "HTTPCommon.hpp"
+#include "core/HTTPConnection.hpp"
+#include "core/HTTPCommon.hpp"
 #include <format>
 
 namespace
@@ -27,7 +27,7 @@ namespace server::connection
     {
     }
 
-    std::expected<bool, std::string> HTTPConnection::Handle()
+    std::expected<bool, std::string> HTTPConnection::Handle(const common::Handler &handler)
     {
         while (true)
         {
@@ -56,7 +56,12 @@ namespace server::connection
                     return std::unexpected(std::format("failed to send failed response, err={}", _success.error()));
                 }
             }
-            std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 200, "OK", common::HTTPHeaders{}, "hello world"});
+            std::expected<common::HTTPResponse, std::string> _httpResp = handler(*_httpReq);
+            if (!_httpResp)
+            {
+                return std::unexpected(std::format("failed to execute handler, err={}", _httpResp.error()));
+            }
+            std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(*_httpResp);
             if (!_resp)
             {
                 return std::unexpected(std::format("failed to build response, err={}", _resp.error()));

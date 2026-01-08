@@ -1,6 +1,6 @@
 #pragma once
 #include "Server.hpp"
-#include "HTTPConnection.hpp"
+#include "core/HTTPConnection.hpp"
 
 namespace server
 {

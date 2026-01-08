@@ -1,5 +1,7 @@
 #pragma once
-#include "Connection.hpp"
+#include "core/Connection.hpp"
+#include "core/HTTPCommon.hpp"
+#include <expected>
 
 namespace server::connection
 {
@@ -10,7 +12,7 @@ namespace server::connection
         HTTPConnection(const HTTPConnection &other) = delete;
         HTTPConnection(HTTPConnection &&other) = default;
         ~HTTPConnection() = default;
-        std::expected<bool, std::string> Handle();
+        std::expected<bool, std::string> Handle(const common::Handler &handler);
         HTTPConnection &operator=(const HTTPConnection &other) = delete;
         HTTPConnection &operator=(HTTPConnection &&other) = default;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "Connection.hpp"
+#include "core/Connection.hpp"
 
 namespace server
 {

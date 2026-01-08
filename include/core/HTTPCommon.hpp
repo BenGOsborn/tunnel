@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <expected>
+#include <functional>
 
 namespace common
 {
@@ -41,4 +42,6 @@ namespace common
     std::expected<HTTPRequest, std::string> ParseHTTPRequest(const std::string &req);
 
     std::expected<std::string, std::string> BuildHTTPResponse(const HTTPResponse &resp);
+
+    using Handler = std::function<std::expected<HTTPResponse, std::string>(const HTTPRequest &req)>;
 }

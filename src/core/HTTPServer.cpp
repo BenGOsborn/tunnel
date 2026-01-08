@@ -1,4 +1,4 @@
-#include "HTTPServer.hpp"
+#include "core/HTTPServer.hpp"
 #include <format>
 
 namespace server
@@ -7,7 +7,7 @@ namespace server
     {
     }
 
-    std::expected<connection::HTTPConnection, std::string> HTTPServer ::Accept()
+    std::expected<connection::HTTPConnection, std::string> HTTPServer::Accept()
     {
         std::expected<connection::Connection, std::string> _conn = server_.Accept();
         if (!_conn)
