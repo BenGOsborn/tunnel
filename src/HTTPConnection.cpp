@@ -2,7 +2,24 @@
 #include "HTTPCommon.hpp"
 #include <format>
 
-#include <iostream>
+namespace
+{
+    std::expected<bool, std::string> SendFailedResponse(server::connection::Connection &connection)
+    {
+        std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 400, "Bad request", common::HTTPHeaders{}, ""});
+        if (!_resp)
+        {
+            return std::unexpected(std::format("failed to build response, err={}", _resp.error()));
+        }
+        auto resp = *_resp;
+        std::expected<bool, std::string> _success = connection.Write(resp);
+        if (!_success)
+        {
+            return std::unexpected(std::format("failed to send response, err={}", _resp.error()));
+        }
+        return true;
+    }
+}
 
 namespace server::connection
 {
@@ -33,7 +50,11 @@ namespace server::connection
             std::expected<common::HTTPRequest, std::string> _httpReq = common::ParseHTTPRequest(req);
             if (!_httpReq)
             {
-                std::cout << "We need to return a 400 here" << std::endl;
+                std::expected<bool, std::string> _success = SendFailedResponse(connection_);
+                if (!_success)
+                {
+                    return std::unexpected(std::format("failed to send failed response, err={}", _success.error()));
+                }
             }
             std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 200, "OK", common::HTTPHeaders{}, "hello world"});
             if (!_resp)
@@ -41,7 +62,6 @@ namespace server::connection
                 return std::unexpected(std::format("failed to build response, err={}", _resp.error()));
             }
             auto resp = *_resp;
-            std::cout << resp << std::endl;
             std::expected<bool, std::string> _success = connection_.Write(resp);
             if (!_success)
             {
