@@ -1,5 +1,5 @@
 #include "HTTPConnection.hpp"
-#include "HTTPRequest.hpp"
+#include "HTTPCommon.hpp"
 #include <format>
 
 #include <iostream>
@@ -15,7 +15,7 @@ namespace server::connection
         while (true)
         {
             std::string req = "";
-            while (!req.contains(request::HEADER_END.c_str()))
+            while (!req.contains(common::HEADER_END.c_str()))
             {
                 std::expected<std::optional<SocketData>, std::string> __data = connection_.Read();
                 if (!__data)
@@ -30,7 +30,7 @@ namespace server::connection
                 SocketData data = *_data;
                 req += std::string(data.data.begin(), data.data.begin() + data.size);
             }
-            std::expected<request::HTTPRequest, std::string> _httpReq = request::ParseHTTPRequest(req);
+            std::expected<common::HTTPRequest, std::string> _httpReq = common::ParseHTTPRequest(req);
             if (!_httpReq)
             {
                 std::cout << "We need to return a 400 here" << std::endl;

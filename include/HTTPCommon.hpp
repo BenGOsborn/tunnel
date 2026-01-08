@@ -3,7 +3,7 @@
 #include <string>
 #include <expected>
 
-namespace request
+namespace common
 {
     using HTTPHeaders = std::map<std::string, std::string>;
 

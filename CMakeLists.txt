@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(app
-    src/main.cpp
+    src/Main.cpp
     src/Server.cpp
     src/Connection.cpp
     src/HTTPServer.cpp
     src/HTTPConnection.cpp
-    src/HTTPRequest.cpp
+    src/HTTPCommon.cpp
     src/Utils.cpp
 )
 

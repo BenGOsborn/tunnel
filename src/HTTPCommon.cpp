@@ -1,4 +1,4 @@
-#include "HTTPRequest.hpp"
+#include "HTTPCommon.hpp"
 #include "Utils.hpp"
 #include <expected>
 #include <format>
@@ -7,9 +7,9 @@ namespace
 {
     struct HTTPRequestLine
     {
-        request::HTTPMethod method;
+        common::HTTPMethod method;
         std::string path;
-        request::HTTPVersion version;
+        common::HTTPVersion version;
     };
 
     struct HTTPHeader
@@ -25,12 +25,12 @@ namespace
         {
             return std::unexpected("invalid number of parts for request line");
         }
-        auto _method = request::ParseHTTPMethod(split[0]);
+        auto _method = common::ParseHTTPMethod(split[0]);
         if (!_method)
         {
             return std::unexpected(std::format("failed to parse method, err={}", _method.error()));
         }
-        auto _version = request::ParseHTTPVersion(split[2]);
+        auto _version = common::ParseHTTPVersion(split[2]);
         if (!_version)
         {
             return std::unexpected(std::format("failed to parse method, err={}", _method.error()));
@@ -51,7 +51,7 @@ namespace
     }
 }
 
-namespace request
+namespace common
 {
     std::expected<HTTPVersion, std::string> ParseHTTPVersion(const std::string &version)
     {
