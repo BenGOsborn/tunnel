@@ -3,5 +3,5 @@
 
 namespace handler
 {
-    std::expected<common::HTTPResponse, std::string> Handle(const common::HTTPRequest &req);
+    common::HTTPResponse Handle(const common::HTTPRequest &req);
 }

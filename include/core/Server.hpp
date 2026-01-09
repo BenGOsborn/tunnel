@@ -5,16 +5,16 @@ namespace server
 {
     class Server
     {
+    private:
+        int fd_;
+
     public:
         Server(const Address &address);
         Server(const Server &other) = delete;
         Server(Server &&other);
         ~Server();
-        std::expected<connection::Connection, std::string> Accept();
+        std::expected<Connection, std::string> Accept();
         Server &operator=(const Server &other) = delete;
         Server &operator=(Server &&other);
-
-    private:
-        int fd_;
     };
 }

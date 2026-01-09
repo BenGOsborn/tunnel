@@ -9,7 +9,6 @@ add_executable(app
     src/core/Server.cpp
     src/core/Connection.cpp
     src/core/HTTPServer.cpp
-    src/core/HTTPConnection.cpp
     src/core/HTTPCommon.cpp
     src/core/Utils.cpp
     src/handler/Handler.cpp

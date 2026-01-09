@@ -27,7 +27,7 @@ namespace server
         close(fd_);
     }
 
-    std::expected<connection::Connection, std::string> Server::Accept()
+    std::expected<Connection, std::string> Server::Accept()
     {
         sockaddr_in client_addr;
         socklen_t len = sizeof(client_addr);
@@ -39,7 +39,7 @@ namespace server
         char ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &client_addr.sin_addr, ip, sizeof(ip));
         int port = ntohs(client_addr.sin_port);
-        return connection::Connection(clientFD, Address{ip, port});
+        return Connection(clientFD, Address{ip, port});
     }
 
     Server &Server::operator=(Server &&other)
