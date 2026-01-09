@@ -24,7 +24,7 @@ namespace common
         HTTPMethod method;
         std::string path;
         HTTPVersion version;
-        HTTPHeaderKVs headers;
+        HTTPHeaderKVs headerKVs;
         std::string body;
     };
 
@@ -33,7 +33,7 @@ namespace common
         HTTPVersion version;
         int statusCode;
         std::string statusMessage;
-        HTTPHeaderKVs headers;
+        HTTPHeaderKVs headerKVs;
         std::string body;
     };
 

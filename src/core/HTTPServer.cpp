@@ -53,15 +53,16 @@ namespace
         return HTTPHeaderHeader{*_method, split[1], *_version};
     }
 
-    std::expected<HTTPHeaderKV, std::string> ParseHTTPHeaderKV(const std::string &header)
+    std::expected<HTTPHeaderKV, std::string> ParseHTTPHeaderKV(const std::string &line)
     {
-        size_t pos = header.find(": ");
+        std::string delim = ": ";
+        size_t pos = line.find(delim);
         if (pos == std::string::npos)
         {
             return std::unexpected("invalid header, missing separator");
         }
-        std::string key = header.substr(0, pos);
-        std::string value = header.substr(pos + 2);
+        std::string key = line.substr(0, pos);
+        std::string value = line.substr(pos + delim.size());
         return HTTPHeaderKV{key, value};
     }
 
@@ -83,21 +84,21 @@ namespace
             return std::unexpected(std::format("failed to parse header header, err={}", _headerHeader.error()));
         }
         auto headerHeader = *_headerHeader;
-        common::HTTPHeaderKVs headers;
+        common::HTTPHeaderKVs headerKVs;
         size_t bodySize = 0;
         for (int i = 1; i < lines.size(); i++)
         {
-            const auto &header = lines[i];
-            std::expected<HTTPHeaderKV, std::string> _httpHeader = ParseHTTPHeaderKV(header);
-            if (!_httpHeader)
+            const auto &rawHeaderKV = lines[i];
+            std::expected<HTTPHeaderKV, std::string> _httpHeaderKV = ParseHTTPHeaderKV(rawHeaderKV);
+            if (!_httpHeaderKV)
             {
-                return std::unexpected(std::format("failed to parse http header, err={}", _httpHeader.error()));
+                return std::unexpected(std::format("failed to parse http header, err={}", _httpHeaderKV.error()));
             }
-            auto httpHeader = *_httpHeader;
-            headers[httpHeader.key] = httpHeader.value;
-            if (httpHeader.key == CONTENT_LENGTH_HEADER)
+            auto httpHeaderKV = *_httpHeaderKV;
+            headerKVs[httpHeaderKV.key] = httpHeaderKV.value;
+            if (httpHeaderKV.key == CONTENT_LENGTH_HEADER)
             {
-                std::expected<int, std::string> _bodySize = utils::SafeSTOI(httpHeader.value);
+                std::expected<int, std::string> _bodySize = utils::SafeSTOI(httpHeaderKV.value);
                 if (!_bodySize)
                 {
                     return std::unexpected(std::format("failed to get body size, err={}", _bodySize.error()));
@@ -105,7 +106,7 @@ namespace
                 bodySize = static_cast<size_t>(*_bodySize);
             }
         }
-        return HTTPHeader{pos, bodySize, headerHeader.method, headerHeader.path, headerHeader.version, headers};
+        return HTTPHeader{pos, bodySize, headerHeader.method, headerHeader.path, headerHeader.version, headerKVs};
     }
 
     std::expected<std::string, std::string> ParseHTTPBody(const std::string &req, size_t bodySize)
@@ -133,15 +134,25 @@ namespace
         }
         auto version = *_version;
         out += std::format("{} {} {}{}", version, resp.statusCode, resp.statusMessage, SEPARATOR);
-        common::HTTPHeaderKVs headers = resp.headers;
-        headers[CONTENT_LENGTH_HEADER] = std::to_string(resp.body.size());
-        for (auto const &[key, val] : headers)
+        common::HTTPHeaderKVs headerKVs = resp.headerKVs;
+        headerKVs[CONTENT_LENGTH_HEADER] = std::to_string(resp.body.size());
+        for (auto const &[key, val] : headerKVs)
         {
             out += std::format("{}: {}{}", key, val, SEPARATOR);
         }
         out += SEPARATOR;
         out += resp.body;
         return out;
+    }
+
+    bool HasMoreHeader(const std::string &req)
+    {
+        return !req.contains(HEADER_END.c_str());
+    }
+
+    bool HasMoreBody(const std::string &req, const HTTPHeader &header)
+    {
+        return req.size() - header.headerSize < header.bodySize;
     }
 
     std::expected<bool, std::string> SendFailedResponse(server::Connection &connection)
@@ -172,7 +183,7 @@ namespace server
         while (true)
         {
             std::string req = "";
-            while (!req.contains(HEADER_END.c_str()))
+            while (HasMoreHeader(req))
             {
                 std::expected<std::optional<SocketData>, std::string> __data = connection_.Read();
                 if (!__data)
@@ -197,7 +208,7 @@ namespace server
                 }
             }
             auto httpHeader = std::move(*_httpHeader);
-            while (req.size() - httpHeader.headerSize < httpHeader.bodySize)
+            while (HasMoreBody(req, httpHeader))
             {
                 std::expected<std::optional<SocketData>, std::string> __data = connection_.Read();
                 if (!__data)
