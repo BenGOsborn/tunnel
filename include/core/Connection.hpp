@@ -34,7 +34,7 @@ namespace server
         ~Connection();
         const Address &GetAddress() const;
         std::expected<std::optional<SocketData>, std::string> Read();
-        std::expected<bool, std::string> Write(std::string_view data);
+        std::expected<void, std::string> Write(std::string_view data);
         Connection &operator=(const Connection &other) = delete;
         Connection &operator=(Connection &&other);
     };

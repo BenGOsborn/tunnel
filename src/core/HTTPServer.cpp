@@ -155,7 +155,7 @@ namespace
         return req.size() - header.headerSize < header.bodySize;
     }
 
-    std::expected<bool, std::string> SendFailedResponse(server::Connection &connection)
+    std::expected<void, std::string> SendFailedResponse(server::Connection &connection)
     {
         std::expected<std::string, std::string> _resp = BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 400, "Bad request", common::HTTPHeaderKVs{}, ""});
         if (!_resp)
@@ -163,12 +163,12 @@ namespace
             return std::unexpected(std::format("failed to build response, err={}", _resp.error()));
         }
         auto resp = *_resp;
-        std::expected<bool, std::string> _success = connection.Write(resp);
+        std::expected<void, std::string> _success = connection.Write(resp);
         if (!_success)
         {
             return std::unexpected(std::format("failed to send response, err={}", _resp.error()));
         }
-        return true;
+        return std::expected<void, std::string>{};
     }
 }
 
@@ -178,7 +178,7 @@ namespace server
     {
     }
 
-    std::expected<bool, std::string> HTTPServer::HTTPConnection::Handle(const common::Handler &handler)
+    std::expected<void, std::string> HTTPServer::HTTPConnection::Handle(const common::Handler &handler)
     {
         while (true)
         {
@@ -193,7 +193,7 @@ namespace server
                 std::optional<SocketData> _data = *__data;
                 if (!_data)
                 {
-                    return true;
+                    return std::expected<void, std::string>{};
                 }
                 SocketData data = *_data;
                 req += std::string(data.data.begin(), data.data.begin() + data.size);
@@ -201,7 +201,7 @@ namespace server
             std::expected<HTTPHeader, std::string> _httpHeader = ParseHTTPHeader(req);
             if (!_httpHeader)
             {
-                std::expected<bool, std::string> _success = SendFailedResponse(connection_);
+                std::expected<void, std::string> _success = SendFailedResponse(connection_);
                 if (!_success)
                 {
                     return std::unexpected(std::format("failed to send failed response, err={}", _success.error()));
@@ -218,7 +218,7 @@ namespace server
                 std::optional<SocketData> _data = *__data;
                 if (!_data)
                 {
-                    return true;
+                    return std::expected<void, std::string>{};
                 }
                 SocketData data = *_data;
                 req += std::string(data.data.begin(), data.data.begin() + data.size);
@@ -235,7 +235,7 @@ namespace server
                 return std::unexpected(std::format("failed to build response, err={}", _resp.error()));
             }
             auto resp = *_resp;
-            std::expected<bool, std::string> _success = connection_.Write(resp);
+            std::expected<void, std::string> _success = connection_.Write(resp);
             if (!_success)
             {
                 return std::unexpected(std::format("failed to send response, err={}", _resp.error()));
@@ -257,7 +257,7 @@ namespace server
         return HTTPConnection(std::move(*_conn));
     }
 
-    std::expected<bool, std::string> HTTPServer::Listen(const common::Handler &handler)
+    std::expected<void, std::string> HTTPServer::Listen(const common::Handler &handler)
     {
         while (true)
         {

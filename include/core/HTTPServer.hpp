@@ -20,7 +20,7 @@ namespace server
             HTTPConnection(const HTTPConnection &other) = delete;
             HTTPConnection(HTTPConnection &&other) = default;
             ~HTTPConnection() = default;
-            std::expected<bool, std::string> Handle(const common::Handler &handler);
+            std::expected<void, std::string> Handle(const common::Handler &handler);
             HTTPConnection &operator=(const HTTPConnection &other) = delete;
             HTTPConnection &operator=(HTTPConnection &&other) = default;
         };
@@ -32,7 +32,7 @@ namespace server
         HTTPServer(const HTTPServer &other) = delete;
         HTTPServer(HTTPServer &&other) = default;
         ~HTTPServer() = default;
-        std::expected<bool, std::string> Listen(const common::Handler &handler);
+        std::expected<void, std::string> Listen(const common::Handler &handler);
         HTTPServer &operator=(const HTTPServer &other) = delete;
         HTTPServer &operator=(HTTPServer &&other) = default;
     };

@@ -12,7 +12,7 @@ int main()
     server::HTTPServer httpServer{server::Server{server::Address{HOST, PORT}}};
     std::cout << "Server is listening... " << HOST << ":" << PORT << std::endl;
 
-    std::expected<bool, std::string> _success = httpServer.Listen(handler::Handle);
+    std::expected<void, std::string> _success = httpServer.Listen(handler::Handle);
     if (!_success)
     {
         throw std::runtime_error(std::format("failed to accept client, err={}", _success.error()));

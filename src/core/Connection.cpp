@@ -50,7 +50,7 @@ namespace server
         return result;
     }
 
-    std::expected<bool, std::string> Connection::Write(std::string_view data)
+    std::expected<void, std::string> Connection::Write(std::string_view data)
     {
         size_t total = 0;
         while (total < data.size())
@@ -62,7 +62,7 @@ namespace server
             }
             total += static_cast<size_t>(n);
         }
-        return true;
+        return std::expected<void, std::string>{};
     }
 
     Connection &Connection::operator=(Connection &&other)
