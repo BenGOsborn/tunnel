@@ -6,8 +6,6 @@
 
 namespace common
 {
-    constexpr std::string HEADER_END = "\r\n\r\n";
-
     using HTTPHeaderKVs = std::map<std::string, std::string>;
 
     enum HTTPMethod
@@ -23,8 +21,6 @@ namespace common
 
     struct HTTPRequest
     {
-        size_t headerSize;
-        size_t bodySize;
         HTTPMethod method;
         std::string path;
         HTTPVersion version;
@@ -41,11 +37,10 @@ namespace common
         std::string body;
     };
 
-    std::expected<HTTPRequest, std::string> ParseHTTPRequest(const std::string &req);
-
-    std::expected<std::string, std::string> ParseHTTPBody(const std::string &req, size_t bodySize);
-
-    std::expected<std::string, std::string> BuildHTTPResponse(const HTTPResponse &resp);
+    std::expected<common::HTTPVersion, std::string> ParseHTTPVersion(const std::string &version);
+    std::expected<common::HTTPMethod, std::string> ParseHTTPMethod(const std::string &method);
+    std::expected<std::string, std::string> SerializeHTTPVersion(const common::HTTPVersion &version);
+    std::expected<std::string, std::string> SerializeHTTPMethod(const common::HTTPMethod &method);
 
     using Handler = std::function<HTTPResponse(const HTTPRequest &req)>;
 }
