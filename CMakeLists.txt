@@ -12,6 +12,7 @@ add_executable(app
     src/core/HTTPCommon.cpp
     src/core/Utils.cpp
     src/handler/Handler.cpp
+    src/tpool/Queue.cpp
 )
 
 target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -5,7 +5,7 @@
 
 namespace tpool
 {
-    template <typename T, std::size_t N>
+    template <typename T, size_t N>
     class Queue
     {
         Queue();
@@ -16,6 +16,6 @@ namespace tpool
     private:
         int writePtr_;
         int readPtr_;
-        std::array<T, N> queue_
+        std::array<T, N> queue_;
     };
 }
