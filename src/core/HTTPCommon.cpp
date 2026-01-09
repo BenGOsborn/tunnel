@@ -20,7 +20,7 @@ namespace
         common::HTTPVersion version;
     };
 
-    struct HTTPHeader
+    struct HTTPHeaderKV
     {
         std::string key;
         std::string value;
@@ -92,7 +92,7 @@ namespace
         return HTTPRequestLine{*_method, split[1], *_version};
     }
 
-    std::expected<HTTPHeader, std::string> ParseHTTPHeader(const std::string &header)
+    std::expected<HTTPHeaderKV, std::string> ParseHTTPHeaderKV(const std::string &header)
     {
         size_t pos = header.find(": ");
         if (pos == std::string::npos)
@@ -101,7 +101,7 @@ namespace
         }
         std::string key = header.substr(0, pos);
         std::string value = header.substr(pos + 2);
-        return HTTPHeader{key, value};
+        return HTTPHeaderKV{key, value};
     }
 }
 
@@ -125,12 +125,12 @@ namespace common
             return std::unexpected(std::format("failed to parse request line, err={}", _requestLine.error()));
         }
         auto requestLine = *_requestLine;
-        HTTPHeaders httpHeaders;
+        HTTPHeaderKVs httpHeaders;
         size_t bodySize = 0;
         for (int i = 1; i < lines.size(); i++)
         {
             const auto &header = lines[i];
-            std::expected<HTTPHeader, std::string> _httpHeader = ParseHTTPHeader(header);
+            std::expected<HTTPHeaderKV, std::string> _httpHeader = ParseHTTPHeaderKV(header);
             if (!_httpHeader)
             {
                 return std::unexpected(std::format("failed to parse http header, err={}", _httpHeader.error()));
@@ -171,7 +171,7 @@ namespace common
         }
         auto version = *_version;
         out += std::format("{} {} {}{}", version, resp.statusCode, resp.statusMessage, SEPARATOR);
-        HTTPHeaders headers = resp.headers;
+        HTTPHeaderKVs headers = resp.headers;
         headers[CONTENT_LENGTH_HEADER] = std::to_string(resp.body.size());
         for (auto const &[key, val] : headers)
         {

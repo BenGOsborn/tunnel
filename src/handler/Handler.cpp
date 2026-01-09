@@ -5,7 +5,7 @@ namespace handler
 {
     common::HTTPResponse Handle(const common::HTTPRequest &req)
     {
-        common::HTTPResponse resp{req.version, 200, "OK", common::HTTPHeaders{}, std::format("Path: {}, body: {}", req.path, req.body)};
+        common::HTTPResponse resp{req.version, 200, "OK", common::HTTPHeaderKVs{}, std::format("Path: {}, body: {}", req.path, req.body)};
         return resp;
     }
 }

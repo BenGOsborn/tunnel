@@ -6,7 +6,7 @@ namespace
 {
     std::expected<bool, std::string> SendFailedResponse(server::Connection &connection)
     {
-        std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 400, "Bad request", common::HTTPHeaders{}, ""});
+        std::expected<std::string, std::string> _resp = common::BuildHTTPResponse(common::HTTPResponse{common::HTTPVersion::V1_1, 400, "Bad request", common::HTTPHeaderKVs{}, ""});
         if (!_resp)
         {
             return std::unexpected(std::format("failed to build response, err={}", _resp.error()));

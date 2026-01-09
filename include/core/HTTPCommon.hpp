@@ -8,7 +8,7 @@ namespace common
 {
     constexpr std::string HEADER_END = "\r\n\r\n";
 
-    using HTTPHeaders = std::map<std::string, std::string>;
+    using HTTPHeaderKVs = std::map<std::string, std::string>;
 
     enum HTTPMethod
     {
@@ -28,7 +28,7 @@ namespace common
         HTTPMethod method;
         std::string path;
         HTTPVersion version;
-        HTTPHeaders headers;
+        HTTPHeaderKVs headers;
         std::string body;
     };
 
@@ -37,7 +37,7 @@ namespace common
         HTTPVersion version;
         int statusCode;
         std::string statusMessage;
-        HTTPHeaders headers;
+        HTTPHeaderKVs headers;
         std::string body;
     };
 
