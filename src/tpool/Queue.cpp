@@ -11,9 +11,16 @@ namespace tpool
     template <typename T, std::size_t N>
     std::expected<T, std::string> Queue<T, N>::Pop()
     {
+        // **** This is actually not the case because what happens if its in a ring mode...
         if (readPtr_ > writePtr_)
         {
             return std::unexpected("no data to read");
+        }
+        auto data = queue_[readPtr_];
+        readPtr_ += 1;
+        if (readPtr_ >= queue_.size())
+        {
+            readPtr_ = 0;
         }
     }
 
