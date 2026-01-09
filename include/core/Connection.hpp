@@ -23,6 +23,10 @@ namespace server
 
     class Connection
     {
+    private:
+        int fd_;
+        Address address_;
+
     public:
         Connection(int clientDescriptor, Address address);
         Connection(const Connection &other) = delete;
@@ -33,9 +37,5 @@ namespace server
         std::expected<bool, std::string> Write(std::string_view data);
         Connection &operator=(const Connection &other) = delete;
         Connection &operator=(Connection &&other);
-
-    private:
-        int fd_;
-        Address address_;
     };
 }
