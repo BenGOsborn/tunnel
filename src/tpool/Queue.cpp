@@ -28,7 +28,7 @@ namespace tpool
         cv_.wait(lock, [this]
                  { return !IsEmpty(readPtr_, writePtr_, N); });
         auto data = std::move(queue_[readPtr_]);
-        readPtr_ = CalculateIndex(readPtr_ + 1);
+        readPtr_ = CalculateIndex(readPtr_ + 1, N);
         return data;
     }
 
@@ -36,8 +36,10 @@ namespace tpool
     void Queue<T, N>::Push(const T &data)
     {
         std::unique_lock<std::mutex> lock(mtx_);
-        writePtr_ = CalculateIndex(writePtr_ + 1);
-        queue_[writePtr_] = std::move(data, N);
+        writePtr_ = CalculateIndex(writePtr_ + 1, N);
+        queue_[writePtr_] = std::move(data);
         cv_.notify_one();
     }
+
+    template class Queue<int, 10>;
 }

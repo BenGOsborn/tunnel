@@ -43,4 +43,6 @@ namespace tpool
             thread.join();
         }
     }
+
+    template class Pool<int, 10, 10>;
 }
