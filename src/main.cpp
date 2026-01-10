@@ -7,6 +7,8 @@
 constexpr std::string HOST = "127.0.0.1";
 constexpr int PORT = 8080;
 
+// TODO need a way to handle shutdown signals and safely clean all the file descriptors
+
 int main()
 {
     server::HTTPServer httpServer{server::Server{server::Address{HOST, PORT}}};
