@@ -6,6 +6,11 @@ namespace
     {
         return idx % size;
     }
+
+    bool IsEmpty(int readPtr, int writePtr, size_t size)
+    {
+        return CalculateIndex(readPtr, size) == CalculateIndex(writePtr + 1, size);
+    }
 }
 
 namespace tpool
@@ -17,22 +22,22 @@ namespace tpool
     }
 
     template <typename T, size_t N>
-    std::expected<T, std::string> Queue<T, N>::Pop()
+    T Queue<T, N>::Pop()
     {
-        if (CalculateIndex(readPtr_ + 1) == CalculateIndex(writePtr_))
-        {
-            return std::unexpected("no data to read");
-        }
-        auto data = queue_[readPtr_];
-        readPtr_ += 1;
-        if (readPtr_ >= queue_.size())
-        {
-            readPtr_ = 0;
-        }
+        std::unique_lock<std::mutex> lock(mtx_);
+        cv_.wait(lock, [this]
+                 { return !IsEmpty(readPtr_, writePtr_, N); });
+        auto data = std::move(queue_[readPtr_]);
+        readPtr_ = CalculateIndex(readPtr_ + 1);
+        return data;
     }
 
     template <typename T, size_t N>
-    std::expected<void, std::string> Queue<T, N>::Push(const T &data)
+    void Queue<T, N>::Push(const T &data)
     {
+        std::unique_lock<std::mutex> lock(mtx_);
+        writePtr_ = CalculateIndex(writePtr_ + 1);
+        queue_[writePtr_] = std::move(data, N);
+        cv_.notify_one();
     }
 }

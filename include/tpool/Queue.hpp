@@ -1,21 +1,25 @@
 #pragma once
 #include <array>
-#include <expected>
 #include <string>
+#include <mutex>
+#include <condition_variable>
 
 namespace tpool
 {
     template <typename T, size_t N>
     class Queue
     {
-        Queue();
-        ~Queue() = default;
-        std::expected<T, std::string> Pop();
-        std::expected<void, std::string> Push(const T &data);
-
     private:
         int writePtr_;
         int readPtr_;
         std::array<T, N> queue_;
+        std::mutex mtx_;
+        std::condition_variable cv_;
+
+    public:
+        Queue();
+        ~Queue() = default;
+        T Pop();
+        void Push(const T &data);
     };
 }
