@@ -4,8 +4,6 @@
 #include <format>
 #include <iostream>
 
-#include <tpool/Pool.hpp>
-
 constexpr std::string HOST = "127.0.0.1";
 constexpr int PORT = 8080;
 
@@ -21,8 +19,6 @@ int main()
     {
         throw std::runtime_error(std::format("failed to accept client, err={}", _success.error()));
     }
-
-    tpool::Pool<int, 10, 10>([](const int &x) {});
 
     return 0;
 }

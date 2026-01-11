@@ -270,7 +270,7 @@ namespace server
             auto _success = conn.Handle(handler);
             if (!_success)
             {
-                throw std::unexpected(std::format("failed to handle request, err={}", _success.error()));
+                return std::unexpected(std::format("failed to handle request, err={}", _success.error()));
             }
         }
     }
