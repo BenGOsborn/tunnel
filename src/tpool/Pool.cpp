@@ -6,7 +6,7 @@ namespace
     template <typename T, size_t N>
     std::function<void()> Worker(const std::function<void(const T &item)> &fn, tpool::Queue<T, N> &queue, const std::atomic<bool> &shutdown)
     {
-        return [&fn, &queue, &shutdown]()
+        return [fn, &queue, &shutdown]()
         {
             while (!shutdown.load())
             {

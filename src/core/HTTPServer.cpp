@@ -3,7 +3,6 @@
 #include "core/Utils.hpp"
 #include <format>
 #include <iostream>
-#include <functional>
 
 namespace
 {
@@ -172,19 +171,6 @@ namespace
         }
         return std::expected<void, std::string>{};
     }
-
-    template <size_t N, size_t M>
-    std::function<void(const typename server::HTTPServer<N, M>::HTTPConnection &conn)> Worker(const common::Handler &fn)
-    {
-        return [&fn](const typename server::HTTPServer<N, M>::HTTPConnection &conn)
-        {
-            auto _success = conn.Handle(fn);
-            if (!_success)
-            {
-                std::cout << std::format("failed to handle request, err={}", _success.error()) << std::endl;
-            }
-        };
-    }
 }
 
 namespace server
@@ -261,7 +247,7 @@ namespace server
     }
 
     template <size_t N, size_t M>
-    HTTPServer<N, M>::HTTPServer(Server &&server) : server_(std::move(server)), pool_(tpool::Pool<HTTPServer<N, M>::HTTPConnection, N, M>(Worker))
+    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler) : server_(std::move(server)), pool_(tpool::Pool<HTTPServer<N, M>::HTTPConnection, N, M>(Worker(handler)))
     {
     }
 
@@ -277,7 +263,20 @@ namespace server
     }
 
     template <size_t N, size_t M>
-    std::expected<void, std::string> HTTPServer<N, M>::Listen(const common::Handler &handler)
+    std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &conn)> HTTPServer<N, M>::Worker(const common::Handler &fn)
+    {
+        return [fn](typename server::HTTPServer<N, M>::HTTPConnection &conn)
+        {
+            auto _success = conn.Handle(fn);
+            if (!_success)
+            {
+                std::cout << std::format("failed to handle request, err={}", _success.error()) << std::endl;
+            }
+        };
+    }
+
+    template <size_t N, size_t M>
+    std::expected<void, std::string> HTTPServer<N, M>::Listen()
     {
         std::expected<HTTPConnection, std::string> _conn = Accept();
         if (!_conn)
@@ -287,4 +286,6 @@ namespace server
         pool_.Submit(std::move(*_conn));
         return std::expected<void, std::string>{};
     }
+
+    template class HTTPServer<10, 10>;
 }

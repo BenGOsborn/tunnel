@@ -3,6 +3,7 @@
 #include "core/Connection.hpp"
 #include "core/HTTPCommon.hpp"
 #include "tpool/Pool.hpp"
+#include <functional>
 
 namespace server
 {
@@ -30,13 +31,14 @@ namespace server
         tpool::Pool<HTTPConnection, N, M> pool_;
 
         std::expected<HTTPConnection, std::string> Accept();
+        std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &conn)> Worker(const common::Handler &fn);
 
     public:
-        HTTPServer(Server &&server);
+        HTTPServer(Server &&server, const common::Handler &handler);
         HTTPServer(const HTTPServer &other) = delete;
         HTTPServer(HTTPServer &&other) = delete;
         ~HTTPServer() = default;
-        std::expected<void, std::string> Listen(const common::Handler &handler);
+        std::expected<void, std::string> Listen();
         HTTPServer &operator=(const HTTPServer &other) = delete;
         HTTPServer &operator=(HTTPServer &&other) = delete;
     };
