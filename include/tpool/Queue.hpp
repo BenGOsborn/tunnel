@@ -19,7 +19,11 @@ namespace tpool
     public:
         Queue();
         ~Queue() = default;
+        Queue(const Queue &other) = delete;
+        Queue(Queue &&other);
         T Pop();
         void Push(const T &data);
+        Queue &operator=(const Queue &other) = delete;
+        Queue &operator=(Queue &&other);
     };
 }

@@ -3,6 +3,7 @@
 #include <array>
 #include <thread>
 #include <functional>
+#include <atomic>
 
 namespace tpool
 {
@@ -13,10 +14,11 @@ namespace tpool
         Queue<T, N> queue_;
         std::array<std::thread, M> threads_;
         std::function<void(const T &item)> fn_;
+        std::atomic<bool> shutdown_;
 
     public:
         Pool(const std::function<void(const T &item)> &fn);
+        ~Pool();
         void Submit(const T &item);
-        void Start();
     };
 }
