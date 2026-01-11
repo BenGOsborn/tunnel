@@ -28,7 +28,7 @@ namespace tpool
     template <typename T, size_t N, size_t M>
     void Pool<T, N, M>::Submit(const T &item)
     {
-        queue_.Push(item);
+        queue_.Push(std::move(item));
     }
 
     template <typename T, size_t N, size_t M>
