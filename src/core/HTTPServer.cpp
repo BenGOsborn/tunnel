@@ -2,6 +2,8 @@
 #include "core/HTTPCommon.hpp"
 #include "core/Utils.hpp"
 #include <format>
+#include <iostream>
+#include <functional>
 
 namespace
 {
@@ -170,6 +172,19 @@ namespace
         }
         return std::expected<void, std::string>{};
     }
+
+    template <size_t N, size_t M>
+    std::function<void(const typename server::HTTPServer<N, M>::HTTPConnection &conn)> Worker(const common::Handler &fn)
+    {
+        return [&fn](const typename server::HTTPServer<N, M>::HTTPConnection &conn)
+        {
+            auto _success = conn.Handle(fn);
+            if (!_success)
+            {
+                std::cout << std::format("failed to handle request, err={}", _success.error()) << std::endl;
+            }
+        };
+    }
 }
 
 namespace server
@@ -245,9 +260,8 @@ namespace server
         }
     }
 
-    // **** For this worker we actually need to define a new function which takes in all of our logic...
     template <size_t N, size_t M>
-    HTTPServer<N, M>::HTTPServer(Server &&server) : server_(std::move(server)), pool_(tpool::Pool<Job, N, M>)
+    HTTPServer<N, M>::HTTPServer(Server &&server) : server_(std::move(server)), pool_(tpool::Pool<HTTPServer<N, M>::HTTPConnection, N, M>(Worker))
     {
     }
 
@@ -265,19 +279,12 @@ namespace server
     template <size_t N, size_t M>
     std::expected<void, std::string> HTTPServer<N, M>::Listen(const common::Handler &handler)
     {
-        while (true)
+        std::expected<HTTPConnection, std::string> _conn = Accept();
+        if (!_conn)
         {
-            std::expected<HTTPConnection, std::string> _conn = Accept();
-            if (!_conn)
-            {
-                return std::unexpected(std::format("failed to accept client, err={}", _conn.error()));
-            }
-            HTTPConnection conn = std::move(*_conn);
-            auto _success = conn.Handle(handler);
-            if (!_success)
-            {
-                return std::unexpected(std::format("failed to handle request, err={}", _success.error()));
-            }
+            return std::unexpected(std::format("failed to accept client, err={}", _conn.error()));
         }
+        pool_.Submit(std::move(*_conn));
+        return std::expected<void, std::string>{};
     }
 }

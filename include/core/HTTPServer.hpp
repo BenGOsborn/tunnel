@@ -10,12 +10,7 @@ namespace server
     class HTTPServer
     {
     private:
-        struct Job
-        {
-        };
-
         server::Server server_;
-        tpool::Pool<Job, N, M> pool_;
 
         class HTTPConnection
         {
@@ -31,6 +26,8 @@ namespace server
             HTTPConnection &operator=(const HTTPConnection &other) = delete;
             HTTPConnection &operator=(HTTPConnection &&other) = default;
         };
+
+        tpool::Pool<HTTPConnection, N, M> pool_;
 
         std::expected<HTTPConnection, std::string> Accept();
 

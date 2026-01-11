@@ -11,13 +11,16 @@ constexpr int PORT = 8080;
 
 int main()
 {
-    server::HTTPServer httpServer{server::Server{server::Address{HOST, PORT}}};
+    server::HTTPServer<10, 10> httpServer{server::Server{server::Address{HOST, PORT}}};
     std::cout << "Server is listening... " << HOST << ":" << PORT << std::endl;
 
-    std::expected<void, std::string> _success = httpServer.Listen(handler::Handle);
-    if (!_success)
+    while (true)
     {
-        throw std::runtime_error(std::format("failed to accept client, err={}", _success.error()));
+        std::expected<void, std::string> _success = httpServer.Listen(handler::Handle);
+        if (!_success)
+        {
+            throw std::runtime_error(std::format("failed to accept client, err={}", _success.error()));
+        }
     }
 
     return 0;
