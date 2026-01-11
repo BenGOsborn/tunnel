@@ -2,13 +2,20 @@
 #include "Server.hpp"
 #include "core/Connection.hpp"
 #include "core/HTTPCommon.hpp"
+#include "tpool/Pool.hpp"
 
 namespace server
 {
+    template <size_t N, size_t M>
     class HTTPServer
     {
     private:
+        struct Job
+        {
+        };
+
         server::Server server_;
+        tpool::Pool<Job, N, M> pool_;
 
         class HTTPConnection
         {
@@ -30,10 +37,10 @@ namespace server
     public:
         HTTPServer(Server &&server);
         HTTPServer(const HTTPServer &other) = delete;
-        HTTPServer(HTTPServer &&other) = default;
+        HTTPServer(HTTPServer &&other) = delete;
         ~HTTPServer() = default;
         std::expected<void, std::string> Listen(const common::Handler &handler);
         HTTPServer &operator=(const HTTPServer &other) = delete;
-        HTTPServer &operator=(HTTPServer &&other) = default;
+        HTTPServer &operator=(HTTPServer &&other) = delete;
     };
 }

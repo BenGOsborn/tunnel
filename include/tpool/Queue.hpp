@@ -20,10 +20,10 @@ namespace tpool
         Queue();
         ~Queue() = default;
         Queue(const Queue &other) = delete;
-        Queue(Queue &&other);
+        Queue(Queue &&other) = delete;
         T Pop();
         void Push(const T &data);
         Queue &operator=(const Queue &other) = delete;
-        Queue &operator=(Queue &&other);
+        Queue &operator=(Queue &&other) = delete;
     };
 }

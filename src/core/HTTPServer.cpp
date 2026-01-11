@@ -174,11 +174,13 @@ namespace
 
 namespace server
 {
-    HTTPServer::HTTPConnection::HTTPConnection(Connection &&connection) : connection_(std::move(connection))
+    template <size_t N, size_t M>
+    HTTPServer<N, M>::HTTPConnection::HTTPConnection(Connection &&connection) : connection_(std::move(connection))
     {
     }
 
-    std::expected<void, std::string> HTTPServer::HTTPConnection::Handle(const common::Handler &handler)
+    template <size_t N, size_t M>
+    std::expected<void, std::string> HTTPServer<N, M>::HTTPConnection::Handle(const common::Handler &handler)
     {
         while (true)
         {
@@ -243,11 +245,14 @@ namespace server
         }
     }
 
-    HTTPServer::HTTPServer(Server &&server) : server_(std::move(server))
+    // **** For this worker we actually need to define a new function which takes in all of our logic...
+    template <size_t N, size_t M>
+    HTTPServer<N, M>::HTTPServer(Server &&server) : server_(std::move(server)), pool_(tpool::Pool<Job, N, M>)
     {
     }
 
-    std::expected<HTTPServer::HTTPConnection, std::string> HTTPServer::Accept()
+    template <size_t N, size_t M>
+    std::expected<typename HTTPServer<N, M>::HTTPConnection, std::string> HTTPServer<N, M>::Accept()
     {
         std::expected<Connection, std::string> _conn = server_.Accept();
         if (!_conn)
@@ -257,7 +262,8 @@ namespace server
         return HTTPConnection(std::move(*_conn));
     }
 
-    std::expected<void, std::string> HTTPServer::Listen(const common::Handler &handler)
+    template <size_t N, size_t M>
+    std::expected<void, std::string> HTTPServer<N, M>::Listen(const common::Handler &handler)
     {
         while (true)
         {

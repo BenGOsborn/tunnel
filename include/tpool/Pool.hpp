@@ -19,6 +19,10 @@ namespace tpool
     public:
         Pool(const std::function<void(const T &item)> &fn);
         ~Pool();
+        Pool(const Pool &other) = delete;
+        Pool(Pool &&other) = delete;
         void Submit(const T &item);
+        Pool &operator=(const Pool &other) = delete;
+        Pool &operator=(Pool &&other) = delete;
     };
 }
