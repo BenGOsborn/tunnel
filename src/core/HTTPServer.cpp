@@ -288,19 +288,17 @@ namespace server
     template <size_t N, size_t M>
     std::expected<void, std::string> HTTPServer<N, M>::Listen()
     {
-        while (true)
+        std::expected<std::optional<std::unique_ptr<HTTPConnection>>, std::string> __conn = Accept();
+        if (!__conn)
         {
-            std::expected<std::optional<std::unique_ptr<HTTPConnection>>, std::string> __conn = Accept();
-            if (!__conn)
-            {
-                return std::unexpected(std::format("failed to accept client, err={}", __conn.error()));
-            }
-            auto &_conn = *__conn;
-            if (_conn)
-            {
-                pool_.Submit(std::move(*_conn));
-            }
+            return std::unexpected(std::format("failed to accept client, err={}", __conn.error()));
         }
+        auto &_conn = *__conn;
+        if (_conn)
+        {
+            pool_.Submit(std::move(*_conn));
+        }
+        return std::expected<void, std::string>();
     }
 
     template class HTTPServer<10, 10>;

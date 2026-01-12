@@ -19,7 +19,7 @@ namespace server
         listen(fd_, SOMAXCONN);
     }
 
-    Server::Server(Server &&other) : fd_(other.fd_)
+    Server::Server(Server &&other) : fd_(other.fd_), timeout_(other.timeout_)
     {
         other.fd_ = -1;
     }
