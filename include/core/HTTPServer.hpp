@@ -5,6 +5,7 @@
 #include "tpool/Pool.hpp"
 #include <functional>
 #include <memory>
+#include <optional>
 
 namespace server
 {
@@ -13,6 +14,7 @@ namespace server
     {
     private:
         server::Server server_;
+        int timeout_;
 
         class HTTPConnection
         {
@@ -31,11 +33,11 @@ namespace server
 
         tpool::Pool<std::unique_ptr<HTTPConnection>, N, M> pool_;
 
-        std::expected<std::unique_ptr<HTTPConnection>, std::string> Accept();
+        std::expected<std::optional<std::unique_ptr<HTTPConnection>>, std::string> Accept();
         std::function<void(typename std::unique_ptr<server::HTTPServer<N, M>::HTTPConnection> conn)> Worker(const common::Handler &fn);
 
     public:
-        HTTPServer(Server &&server, const common::Handler &handler);
+        HTTPServer(Server &&server, const common::Handler &handler, int timeout);
         HTTPServer(const HTTPServer &other) = delete;
         HTTPServer(HTTPServer &&other) = delete;
         ~HTTPServer() = default;

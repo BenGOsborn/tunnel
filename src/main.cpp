@@ -8,6 +8,7 @@
 
 constexpr std::string HOST = "127.0.0.1";
 constexpr int PORT = 8080;
+constexpr int TIMEOUT_SECS = 5;
 
 std::atomic<bool> shutdown{false};
 
@@ -21,7 +22,7 @@ int main()
     std::signal(SIGTERM, HandleShutdown);
     std::signal(SIGINT, HandleShutdown);
 
-    server::HTTPServer<10, 10> httpServer{server::Server{server::Address{HOST, PORT}}, handler::Handle};
+    server::HTTPServer<10, 10> httpServer{server::Server{server::Address{HOST, PORT}}, handler::Handle, TIMEOUT_SECS};
     std::cout << "Server is listening... " << HOST << ":" << PORT << std::endl;
 
     while (!shutdown.load())

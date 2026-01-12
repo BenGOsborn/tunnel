@@ -210,7 +210,7 @@ namespace server
                     return std::unexpected(std::format("failed to send failed response, err={}", _success.error()));
                 }
             }
-            auto httpHeader = std::move(*_httpHeader);
+            auto &httpHeader = *_httpHeader;
             while (HasMoreBody(req, httpHeader))
             {
                 std::expected<std::optional<SocketData>, std::string> __data = connection_.Read();
@@ -231,7 +231,8 @@ namespace server
             {
                 return std::unexpected(std::format("failed to get body, err={}", _body.error()));
             }
-            common::HTTPResponse httpResp = handler(common::HTTPRequest{httpHeader.method, httpHeader.path, httpHeader.version, httpHeader.headers, std::move(*_body)});
+            auto &body = *_body;
+            common::HTTPResponse httpResp = handler(common::HTTPRequest{httpHeader.method, httpHeader.path, httpHeader.version, httpHeader.headers, body});
             std::expected<std::string, std::string> _resp = BuildHTTPResponse(httpResp);
             if (!_resp)
             {
@@ -247,17 +248,22 @@ namespace server
     }
 
     template <size_t N, size_t M>
-    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler) : server_(std::move(server)), pool_(tpool::Pool<std::unique_ptr<HTTPServer<N, M>::HTTPConnection>, N, M>(Worker(handler)))
+    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler, int timeout) : server_(std::move(server)), timeout_(timeout), pool_(tpool::Pool<std::unique_ptr<HTTPServer<N, M>::HTTPConnection>, N, M>(Worker(handler)))
     {
     }
 
     template <size_t N, size_t M>
-    std::expected<std::unique_ptr<typename HTTPServer<N, M>::HTTPConnection>, std::string> HTTPServer<N, M>::Accept()
+    std::expected<std::optional<std::unique_ptr<typename HTTPServer<N, M>::HTTPConnection>>, std::string> HTTPServer<N, M>::Accept()
     {
-        std::expected<Connection, std::string> _conn = server_.Accept();
+        std::expected<std::optional<Connection>, std::string> __conn = server_.Accept(timeout_);
+        if (!__conn)
+        {
+            return std::unexpected(std::format("failed to get connection, err={}", __conn.error()));
+        }
+        auto &_conn = *__conn;
         if (!_conn)
         {
-            return std::unexpected(std::format("failed to get connection, err={}", _conn.error()));
+            return std::nullopt;
         }
         return std::make_unique<HTTPConnection>(std::move(*_conn));
     }
@@ -282,12 +288,16 @@ namespace server
     template <size_t N, size_t M>
     std::expected<void, std::string> HTTPServer<N, M>::Listen()
     {
-        std::expected<std::unique_ptr<HTTPConnection>, std::string> _conn = Accept();
-        if (!_conn)
+        std::expected<std::optional<std::unique_ptr<HTTPConnection>>, std::string> __conn = Accept();
+        if (!__conn)
         {
-            return std::unexpected(std::format("failed to accept client, err={}", _conn.error()));
+            return std::unexpected(std::format("failed to accept client, err={}", __conn.error()));
         }
-        pool_.Submit(std::move(*_conn));
+        auto &_conn = *__conn;
+        if (_conn)
+        {
+            pool_.Submit(std::move(*_conn));
+        }
         return std::expected<void, std::string>{};
     }
 

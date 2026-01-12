@@ -1,5 +1,6 @@
 #pragma once
 #include "core/Connection.hpp"
+#include <optional>
 
 namespace server
 {
@@ -13,7 +14,7 @@ namespace server
         Server(const Server &other) = delete;
         Server(Server &&other);
         ~Server();
-        std::expected<Connection, std::string> Accept();
+        std::expected<std::optional<Connection>, std::string> Accept(int timeout);
         Server &operator=(const Server &other) = delete;
         Server &operator=(Server &&other);
     };

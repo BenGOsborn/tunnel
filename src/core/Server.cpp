@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <format>
 #include <ostream>
+#include <sys/select.h>
+#include <cerrno>
 
 namespace server
 {
@@ -27,8 +29,21 @@ namespace server
         close(fd_);
     }
 
-    std::expected<Connection, std::string> Server::Accept()
+    std::expected<std::optional<Connection>, std::string> Server::Accept(int timeout)
     {
+        fd_set set;
+        FD_ZERO(&set);
+        FD_SET(fd_, &set);
+        timeval tv{timeout, 0};
+        int ready = select(fd_ + 1, &set, nullptr, nullptr, &tv);
+        if (ready < 0)
+        {
+            return std::unexpected(std::format("client error: {}", std::strerror(errno)));
+        }
+        if (ready == 0)
+        {
+            return std::nullopt;
+        }
         sockaddr_in client_addr;
         socklen_t len = sizeof(client_addr);
         int clientFD = accept(fd_, (sockaddr *)&client_addr, &len);
