@@ -1,4 +1,5 @@
 #include "tpool/Queue.hpp"
+#include "core/HTTPServer.hpp"
 
 namespace
 {
@@ -33,13 +34,13 @@ namespace tpool
     }
 
     template <typename T, size_t N>
-    void Queue<T, N>::Push(const T &data)
+    void Queue<T, N>::Push(T &&item)
     {
         std::unique_lock<std::mutex> lock(mtx_);
         writePtr_ = CalculateIndex(writePtr_ + 1, N);
-        queue_[writePtr_] = std::move(data);
+        queue_[writePtr_] = std::move(item);
         cv_.notify_one();
     }
 
-    template class Queue<int, 10>;
+    template class tpool::Queue<server::HTTPServer<10, 10>::HTTPConnection, 10>;
 }

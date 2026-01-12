@@ -263,9 +263,9 @@ namespace server
     }
 
     template <size_t N, size_t M>
-    std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &conn)> HTTPServer<N, M>::Worker(const common::Handler &fn)
+    std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &&conn)> HTTPServer<N, M>::Worker(const common::Handler &fn)
     {
-        return [fn](typename server::HTTPServer<N, M>::HTTPConnection &conn)
+        return [fn](typename server::HTTPServer<N, M>::HTTPConnection &&conn)
         {
             auto _success = conn.Handle(fn);
             if (!_success)

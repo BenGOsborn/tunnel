@@ -31,7 +31,7 @@ namespace server
         tpool::Pool<HTTPConnection, N, M> pool_;
 
         std::expected<HTTPConnection, std::string> Accept();
-        std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &conn)> Worker(const common::Handler &fn);
+        std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &&conn)> Worker(const common::Handler &fn);
 
     public:
         HTTPServer(Server &&server, const common::Handler &handler);

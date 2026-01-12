@@ -22,7 +22,7 @@ namespace tpool
         Queue(const Queue &other) = delete;
         Queue(Queue &&other) = delete;
         T Pop();
-        void Push(const T &data);
+        void Push(T &&item);
         Queue &operator=(const Queue &other) = delete;
         Queue &operator=(Queue &&other) = delete;
     };

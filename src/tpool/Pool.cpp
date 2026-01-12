@@ -1,17 +1,17 @@
 #include "tpool/Pool.hpp"
+#include "core/HTTPServer.hpp"
 #include <functional>
 
 namespace
 {
     template <typename T, size_t N>
-    std::function<void()> Worker(const std::function<void(const T &item)> &fn, tpool::Queue<T, N> &queue, const std::atomic<bool> &shutdown)
+    std::function<void()> Worker(const std::function<void(T &&item)> &fn, tpool::Queue<T, N> &queue, const std::atomic<bool> &shutdown)
     {
         return [fn, &queue, &shutdown]()
         {
             while (!shutdown.load())
             {
-                T item = queue.Pop();
-                fn(item);
+                fn(std::move(queue.Pop()));
             }
         };
     }
@@ -20,7 +20,7 @@ namespace
 namespace tpool
 {
     template <typename T, size_t N, size_t M>
-    Pool<T, N, M>::Pool(const std::function<void(const T &item)> &fn) : queue_(Queue<T, N>()), threads_(std::array<std::thread, M>()), fn_(fn), shutdown_(false)
+    Pool<T, N, M>::Pool(const std::function<void(T &&item)> &fn) : queue_(Queue<T, N>()), threads_(std::array<std::thread, M>()), fn_(fn), shutdown_(false)
     {
         static_assert(M > 0, "size m must be greater than 0");
         for (int i = 0; i < M; i++)
@@ -40,10 +40,10 @@ namespace tpool
     }
 
     template <typename T, size_t N, size_t M>
-    void Pool<T, N, M>::Submit(const T &item)
+    void Pool<T, N, M>::Submit(T &&item)
     {
         queue_.Push(std::move(item));
     }
 
-    template class Pool<int, 10, 10>;
+    template class tpool::Pool<server::HTTPServer<10, 10>::HTTPConnection, 10, 10>;
 }
