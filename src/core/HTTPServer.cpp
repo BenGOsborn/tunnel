@@ -247,27 +247,31 @@ namespace server
     }
 
     template <size_t N, size_t M>
-    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler) : server_(std::move(server)), pool_(tpool::Pool<HTTPServer<N, M>::HTTPConnection, N, M>(Worker(handler)))
+    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler) : server_(std::move(server)), pool_(tpool::Pool<std::unique_ptr<HTTPServer<N, M>::HTTPConnection>, N, M>(Worker(handler)))
     {
     }
 
     template <size_t N, size_t M>
-    std::expected<typename HTTPServer<N, M>::HTTPConnection, std::string> HTTPServer<N, M>::Accept()
+    std::expected<std::unique_ptr<typename HTTPServer<N, M>::HTTPConnection>, std::string> HTTPServer<N, M>::Accept()
     {
         std::expected<Connection, std::string> _conn = server_.Accept();
         if (!_conn)
         {
             return std::unexpected(std::format("failed to get connection, err={}", _conn.error()));
         }
-        return HTTPConnection(std::move(*_conn));
+        return std::make_unique<HTTPConnection>(std::move(*_conn));
     }
 
     template <size_t N, size_t M>
-    std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &&conn)> HTTPServer<N, M>::Worker(const common::Handler &fn)
+    std::function<void(std::unique_ptr<typename server::HTTPServer<N, M>::HTTPConnection> conn)> HTTPServer<N, M>::Worker(const common::Handler &fn)
     {
-        return [fn](typename server::HTTPServer<N, M>::HTTPConnection &&conn)
+        return [fn](std::unique_ptr<typename server::HTTPServer<N, M>::HTTPConnection> conn)
         {
-            auto _success = conn.Handle(fn);
+            if (!conn)
+            {
+                return;
+            }
+            auto _success = (*conn).Handle(fn);
             if (!_success)
             {
                 std::cout << std::format("failed to handle request, err={}", _success.error()) << std::endl;
@@ -278,7 +282,7 @@ namespace server
     template <size_t N, size_t M>
     std::expected<void, std::string> HTTPServer<N, M>::Listen()
     {
-        std::expected<HTTPConnection, std::string> _conn = Accept();
+        std::expected<std::unique_ptr<HTTPConnection>, std::string> _conn = Accept();
         if (!_conn)
         {
             return std::unexpected(std::format("failed to accept client, err={}", _conn.error()));

@@ -45,5 +45,5 @@ namespace tpool
         queue_.Push(std::move(item));
     }
 
-    template class tpool::Pool<server::HTTPServer<10, 10>::HTTPConnection, 10, 10>;
+    template class tpool::Pool<std::unique_ptr<server::HTTPServer<10, 10>::HTTPConnection>, 10, 10>;
 }

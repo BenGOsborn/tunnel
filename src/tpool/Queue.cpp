@@ -42,5 +42,5 @@ namespace tpool
         cv_.notify_one();
     }
 
-    template class tpool::Queue<server::HTTPServer<10, 10>::HTTPConnection, 10>;
+    template class tpool::Queue<std::unique_ptr<server::HTTPServer<10, 10>::HTTPConnection>, 10>;
 }

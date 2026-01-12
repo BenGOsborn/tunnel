@@ -4,6 +4,7 @@
 #include "core/HTTPCommon.hpp"
 #include "tpool/Pool.hpp"
 #include <functional>
+#include <memory>
 
 namespace server
 {
@@ -28,10 +29,10 @@ namespace server
             HTTPConnection &operator=(HTTPConnection &&other) = default;
         };
 
-        tpool::Pool<HTTPConnection, N, M> pool_;
+        tpool::Pool<std::unique_ptr<HTTPConnection>, N, M> pool_;
 
-        std::expected<HTTPConnection, std::string> Accept();
-        std::function<void(typename server::HTTPServer<N, M>::HTTPConnection &&conn)> Worker(const common::Handler &fn);
+        std::expected<std::unique_ptr<HTTPConnection>, std::string> Accept();
+        std::function<void(typename std::unique_ptr<server::HTTPServer<N, M>::HTTPConnection> conn)> Worker(const common::Handler &fn);
 
     public:
         HTTPServer(Server &&server, const common::Handler &handler);
