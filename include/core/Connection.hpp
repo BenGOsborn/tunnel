@@ -26,9 +26,10 @@ namespace server
     private:
         int fd_;
         Address address_;
+        int timeout_;
 
     public:
-        Connection(int clientDescriptor, Address address);
+        Connection(int clientDescriptor, Address address, int timeout);
         Connection(const Connection &other) = delete;
         Connection(Connection &&other);
         ~Connection();

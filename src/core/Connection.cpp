@@ -14,12 +14,12 @@ namespace server
         return os << std::string_view(data.data.data(), data.size);
     }
 
-    Connection::Connection(int clientDescriptor, Address address) : fd_(clientDescriptor), address_(std::move(address))
+    Connection::Connection(int clientDescriptor, Address address, int timeout) : fd_(clientDescriptor), address_(std::move(address)), timeout_(timeout)
     {
     }
 
     Connection::Connection(Connection &&other)
-        : fd_(other.fd_), address_(std::move(other.address_))
+        : fd_(other.fd_), address_(std::move(other.address_)), timeout_(other.timeout_)
     {
         other.fd_ = -1;
     }
@@ -36,6 +36,19 @@ namespace server
 
     std::expected<std::optional<SocketData>, std::string> Connection::Read()
     {
+        fd_set set;
+        FD_ZERO(&set);
+        FD_SET(fd_, &set);
+        timeval tv{timeout_, 0};
+        int ready = select(fd_ + 1, &set, nullptr, nullptr, &tv);
+        if (ready < 0)
+        {
+            return std::unexpected(std::format("client error, err={}", std::strerror(errno)));
+        }
+        if (ready == 0)
+        {
+            return std::nullopt;
+        }
         SocketData result;
         ssize_t size = read(fd_, &result.data, result.data.size());
         if (size < 0)

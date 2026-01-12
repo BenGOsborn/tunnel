@@ -8,7 +8,7 @@
 
 namespace server
 {
-    Server::Server(const Address &address)
+    Server::Server(const Address &address, int timeout) : timeout_(timeout)
     {
         fd_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         sockaddr_in addr{};
@@ -29,16 +29,16 @@ namespace server
         close(fd_);
     }
 
-    std::expected<std::optional<Connection>, std::string> Server::Accept(int timeout)
+    std::expected<std::optional<Connection>, std::string> Server::Accept()
     {
         fd_set set;
         FD_ZERO(&set);
         FD_SET(fd_, &set);
-        timeval tv{timeout, 0};
+        timeval tv{timeout_, 0};
         int ready = select(fd_ + 1, &set, nullptr, nullptr, &tv);
         if (ready < 0)
         {
-            return std::unexpected(std::format("client error: {}", std::strerror(errno)));
+            return std::unexpected(std::format("client error, err={}", std::strerror(errno)));
         }
         if (ready == 0)
         {
@@ -54,7 +54,7 @@ namespace server
         char ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &client_addr.sin_addr, ip, sizeof(ip));
         int port = ntohs(client_addr.sin_port);
-        return Connection(clientFD, Address{ip, port});
+        return Connection(clientFD, Address{ip, port}, timeout_);
     }
 
     Server &Server::operator=(Server &&other)

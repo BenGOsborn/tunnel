@@ -248,14 +248,14 @@ namespace server
     }
 
     template <size_t N, size_t M>
-    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler, int timeout) : server_(std::move(server)), timeout_(timeout), pool_(tpool::Pool<std::unique_ptr<HTTPServer<N, M>::HTTPConnection>, N, M>(Worker(handler)))
+    HTTPServer<N, M>::HTTPServer(Server &&server, const common::Handler &handler) : server_(std::move(server)), pool_(tpool::Pool<std::unique_ptr<HTTPServer<N, M>::HTTPConnection>, N, M>(Worker(handler)))
     {
     }
 
     template <size_t N, size_t M>
     std::expected<std::optional<std::unique_ptr<typename HTTPServer<N, M>::HTTPConnection>>, std::string> HTTPServer<N, M>::Accept()
     {
-        std::expected<std::optional<Connection>, std::string> __conn = server_.Accept(timeout_);
+        std::expected<std::optional<Connection>, std::string> __conn = server_.Accept();
         if (!__conn)
         {
             return std::unexpected(std::format("failed to get connection, err={}", __conn.error()));
@@ -288,17 +288,19 @@ namespace server
     template <size_t N, size_t M>
     std::expected<void, std::string> HTTPServer<N, M>::Listen()
     {
-        std::expected<std::optional<std::unique_ptr<HTTPConnection>>, std::string> __conn = Accept();
-        if (!__conn)
+        while (true)
         {
-            return std::unexpected(std::format("failed to accept client, err={}", __conn.error()));
+            std::expected<std::optional<std::unique_ptr<HTTPConnection>>, std::string> __conn = Accept();
+            if (!__conn)
+            {
+                return std::unexpected(std::format("failed to accept client, err={}", __conn.error()));
+            }
+            auto &_conn = *__conn;
+            if (_conn)
+            {
+                pool_.Submit(std::move(*_conn));
+            }
         }
-        auto &_conn = *__conn;
-        if (_conn)
-        {
-            pool_.Submit(std::move(*_conn));
-        }
-        return std::expected<void, std::string>{};
     }
 
     template class HTTPServer<10, 10>;

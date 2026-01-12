@@ -14,7 +14,6 @@ namespace server
     {
     private:
         server::Server server_;
-        int timeout_;
 
         class HTTPConnection
         {
@@ -37,7 +36,7 @@ namespace server
         std::function<void(typename std::unique_ptr<server::HTTPServer<N, M>::HTTPConnection> conn)> Worker(const common::Handler &fn);
 
     public:
-        HTTPServer(Server &&server, const common::Handler &handler, int timeout);
+        HTTPServer(Server &&server, const common::Handler &handler);
         HTTPServer(const HTTPServer &other) = delete;
         HTTPServer(HTTPServer &&other) = delete;
         ~HTTPServer() = default;
