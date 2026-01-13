@@ -5,10 +5,11 @@
 #include <iostream>
 #include <csignal>
 #include <atomic>
+#include <chrono>
 
 constexpr std::string HOST = "127.0.0.1";
 constexpr int PORT = 8080;
-constexpr int TIMEOUT_SECS = 5;
+constexpr std::chrono::seconds TIMEOUT = std::chrono::seconds(5);
 
 std::atomic<bool> shutdown{false};
 
@@ -21,7 +22,7 @@ int main()
 {
     std::signal(SIGINT, SignalHandler);
     std::signal(SIGTERM, SignalHandler);
-    server::HTTPServer<10, 10> httpServer{server::Server{server::Address{HOST, PORT}, TIMEOUT_SECS}, handler::Handle};
+    server::HTTPServer<10, 10> httpServer{server::Server{server::Address{HOST, PORT}, TIMEOUT}, handler::Handle};
     std::cout << "Server is listening... " << HOST << ":" << PORT << std::endl;
     while (!shutdown.load())
     {

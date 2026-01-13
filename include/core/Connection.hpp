@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <string>
 #include <ostream>
 #include <expected>
@@ -26,10 +27,10 @@ namespace server
     private:
         int fd_;
         Address address_;
-        int timeout_;
+        std::chrono::seconds timeout_;
 
     public:
-        Connection(int clientDescriptor, Address address, int timeout);
+        Connection(int clientDescriptor, Address address, std::chrono::seconds timeout);
         Connection(const Connection &other) = delete;
         Connection(Connection &&other);
         ~Connection();

@@ -8,7 +8,7 @@
 
 namespace server
 {
-    Server::Server(const Address &address, int timeout) : timeout_(timeout)
+    Server::Server(const Address &address, std::chrono::seconds timeout) : timeout_(timeout)
     {
         fd_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         sockaddr_in addr{};
@@ -34,7 +34,7 @@ namespace server
         fd_set set;
         FD_ZERO(&set);
         FD_SET(fd_, &set);
-        timeval tv{timeout_, 0};
+        timeval tv{timeout_.count(), 0};
         int ready = select(fd_ + 1, &set, nullptr, nullptr, &tv);
         if (ready < 0)
         {

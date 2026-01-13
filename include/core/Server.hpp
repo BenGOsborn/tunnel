@@ -1,5 +1,6 @@
 #pragma once
 #include "core/Connection.hpp"
+#include <chrono>
 #include <optional>
 
 namespace server
@@ -8,10 +9,10 @@ namespace server
     {
     private:
         int fd_;
-        int timeout_;
+        std::chrono::seconds timeout_;
 
     public:
-        Server(const Address &address, int timeout);
+        Server(const Address &address, std::chrono::seconds timeout);
         Server(const Server &other) = delete;
         Server(Server &&other);
         ~Server();
