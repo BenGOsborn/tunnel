@@ -10,7 +10,6 @@
 constexpr std::string HOST = "127.0.0.1";
 constexpr int PORT = 8080;
 constexpr std::chrono::seconds TIMEOUT = std::chrono::seconds(5);
-
 std::atomic<bool> shutdown{false};
 
 void SignalHandler(int)
