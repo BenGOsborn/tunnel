@@ -12,7 +12,6 @@ add_executable(app
     src/core/HTTPCommon.cpp
     src/core/Utils.cpp
     src/handler/Handler.cpp
-    src/tpool/Queue.cpp
     src/tpool/Pool.cpp
 )
 

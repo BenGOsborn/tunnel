@@ -1,9 +1,11 @@
 #pragma once
-#include "Queue.hpp"
 #include <array>
 #include <thread>
 #include <functional>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
+#include <optional>
 
 namespace tpool
 {
@@ -11,10 +13,17 @@ namespace tpool
     class Pool
     {
     private:
-        Queue<T, N> queue_;
+        std::array<T, N> queue_;
+        int writePtr_;
+        int readPtr_;
+        std::mutex mtx_;
+        std::condition_variable cv_;
         std::array<std::thread, M> threads_;
-        std::function<void(T &&item)> fn_;
         std::atomic<bool> shutdown_;
+
+        std::function<void()> Worker(const std::function<void(T &&item)> &fn);
+        std::optional<T> Pop();
+        void Push(T &&item);
 
     public:
         Pool(const std::function<void(T &&item)> &fn);
