@@ -8,6 +8,8 @@ namespace common
 {
     using HTTPHeaderKVs = std::map<std::string, std::string>;
 
+    constexpr std::string HEADER_CONTENT_LENGTH = "Content-Length";
+
     enum HTTPMethod
     {
         Get,

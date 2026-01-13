@@ -9,8 +9,6 @@ namespace
     constexpr std::string HEADER_END = "\r\n\r\n";
     constexpr std::string SEPARATOR = "\r\n";
 
-    constexpr std::string CONTENT_LENGTH_HEADER = "Content-Length";
-
     struct HTTPHeaderHeader
     {
         common::HTTPMethod method;
@@ -97,7 +95,7 @@ namespace
             }
             auto httpHeaderKV = *_httpHeaderKV;
             headerKVs[httpHeaderKV.key] = httpHeaderKV.value;
-            if (httpHeaderKV.key == CONTENT_LENGTH_HEADER)
+            if (httpHeaderKV.key == common::HEADER_CONTENT_LENGTH)
             {
                 std::expected<int, std::string> _bodySize = utils::SafeSTOI(httpHeaderKV.value);
                 if (!_bodySize)
@@ -136,7 +134,7 @@ namespace
         auto version = *_version;
         out += std::format("{} {} {}{}", version, resp.statusCode, resp.statusMessage, SEPARATOR);
         common::HTTPHeaderKVs headerKVs = resp.headerKVs;
-        headerKVs[CONTENT_LENGTH_HEADER] = std::to_string(resp.body.size());
+        headerKVs[common::HEADER_CONTENT_LENGTH] = std::to_string(resp.body.size());
         for (auto const &[key, val] : headerKVs)
         {
             out += std::format("{}: {}{}", key, val, SEPARATOR);

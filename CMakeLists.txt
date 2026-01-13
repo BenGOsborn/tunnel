@@ -13,6 +13,7 @@ add_executable(app
     src/core/Utils.cpp
     src/handler/Handler.cpp
     src/tpool/Pool.cpp
+    src/json/JSON.cpp
 )
 
 target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
