@@ -43,7 +43,7 @@ namespace server
         int ready = select(fd_ + 1, &set, nullptr, nullptr, &tv);
         if (ready < 0)
         {
-            return std::unexpected(std::format("client error, err={}", std::strerror(errno)));
+            return std::unexpected(std::format("select error, err={}", std::strerror(errno)));
         }
         if (ready == 0)
         {
@@ -53,7 +53,7 @@ namespace server
         ssize_t size = read(fd_, &result.data, result.data.size());
         if (size < 0)
         {
-            return std::unexpected(std::format("read failed, reason={}", std::strerror(errno)));
+            return std::unexpected(std::format("read err, err={}", std::strerror(errno)));
         }
         if (size == 0)
         {
@@ -71,7 +71,7 @@ namespace server
             ssize_t n = write(fd_, data.data() + total, data.size() - total);
             if (n <= 0)
             {
-                return std::unexpected(std::format("write failed, reason={}", std::strerror(errno)));
+                return std::unexpected(std::format("write err, err={}", std::strerror(errno)));
             }
             total += static_cast<size_t>(n);
         }
